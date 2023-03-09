@@ -1,4 +1,4 @@
 name,bus,control,p_nom_extendable,p_nom,capital_cost,marginal_cost
-Wind,Power,Slack,TRUE,0,1.27E+05,0
-Solar,Power,PQ,TRUE,0,6.95E+04,0
+Wind,Power,Slack,TRUE,0,1.77E+05,0
+Solar,Power,PQ,TRUE,0,1.07E+05,0
 SolarTracking,Power,PQ,FALSE,0,1.00E+09,0

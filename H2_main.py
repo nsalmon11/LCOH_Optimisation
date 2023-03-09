@@ -8,14 +8,14 @@ N Salmon 28/01/2023
 """
 
 
-def main():
+def main(file_name, extension):
     """Code to execute run at a single location"""
     # ==================================================================================================================
     # Set up network
     # ==================================================================================================================
 
     # Import the weather data
-    weather_data = aux.get_weather_data()
+    weather_data = aux.get_weather_data(file_name=file_name)
 
     # Import a generic network
     n = pypsa.Network(override_component_attrs=aux.create_override_components())
@@ -40,7 +40,8 @@ def main():
             count += 1
         else:
             raise ValueError("You have weather data that isn't in your list of renewables, so I don't know what those "
-                             " renewables cost. \n Edit generators.csv to include all of the renewables for which you've "
+                             " renewables cost. \n "
+                             "Edit generators.csv to include all of the renewables for which you've "
                              " provided data")
     if count != len(renewables_lst):
         raise ValueError("You have renewables for which you haven't provided a weather dataset. "
@@ -51,7 +52,7 @@ def main():
     # Check if the CAPEX input format in Basic_H2_plant is correct, and fix it up if not
     # ==================================================================================================================
 
-    CAPEX_check = aux.check_CAPEX()
+    CAPEX_check = aux.check_CAPEX(file_name=file_name)
     if CAPEX_check is not None:
         for item in [n.generators, n.links, n.stores]:
             item.capital_cost = item.capital_cost * CAPEX_check[1]/100 + item.capital_cost/CAPEX_check[0]
@@ -61,12 +62,12 @@ def main():
     # ==================================================================================================================
 
     # Ask the user how they would like to solve
-    solver, formulator = aux.get_solving_info()
+    solver, formulator = aux.get_solving_info(file_name=file_name)
 
     # Implement their answer
     if formulator == 'l':
         print("You're not using pyomo!")
-        n.lopf(solver_name=solver, pyomo=False, extra_functionality=aux.extra_functionalities)
+        n.lopf(solver_name=solver, pyomo=False)
     else:
         print("You're using pyomo!")
         n.lopf(solver_name=solver, pyomo=True)
@@ -76,14 +77,17 @@ def main():
     # ==================================================================================================================
 
     # Scale if needed
-    scale = aux.get_scale(n)
+    scale = aux.get_scale(n, file_name=file_name)
 
     # Put the results in a nice format
     output = aux.get_results_dict_for_excel(n, scale)
 
     # Send the results to excel
-    aux.write_results_to_excel(output)
+    aux.write_results_to_excel(output, file_name=file_name, extension=extension)
 
 
 if __name__ == '__main__':
-    main()
+    file_list = ['Hughenden', 'NQCEH', 'SWQ', 'Western Downs', 'Barcaldine', 'Banana_rez']
+    file_list = ['Barcaldine']
+    for file in file_list:
+        main(file, '_2030')
